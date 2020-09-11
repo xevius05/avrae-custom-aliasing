@@ -1,0 +1,77 @@
+# Swoon - using charisma check to evaluate how much a character can swoon
+!alias swoon tembed
+<drac2>
+cc="Swoon!"
+v=cc_exists(cc)
+get_cc(cc) if v else create_cc("Swoon!",0,5, "long","bubble")
+die=vroll(f"1d20+{charismaMod}")
+mod_cc(cc, -1) if v and get_cc(cc) else err("You have no more swooning left!")
+
+a= "**Swooning to MAX!**" if die.total==(20+charismaMod) else "Swooning too well!" if 10+charismaMod<=die.total<=19+charismaMod else "Need to swoon more!" if 2+charismaMod<=die.total<=9+charismaMod else "**Lost your swooning ability!**"
+
+result=f' -title "{name} shows off their swooning ability!" -desc "When {name} gives you a feeling of pure joy, you have..." -f "Result|{die}\n{a}" -f "{cc} | {cc_str(cc) if v else "*None*"}" -footer "Disclaimer: This has nothing to do with the combat mechanics, but for fun rping purposes!"'
+
+return result
+</drac2>
+-thumb <image> -color <color>
+
+-----
+# House rule - Downtime activity in earning XP and GP exceeding DC 12
+##Version 1
+!alias dt embed
+<drac2>
+Roll1, Roll2, Roll3= vroll(f"1d20+{strengthMod}"), vroll(f"1d20+{strengthMod}"), vroll(f"1d20+{strengthMod+proficiencyBonus+1}") 
+dc = 12
+
+p, q, r = 0 if Roll1.total<dc else Roll1.total, 0 if Roll2.total<dc else Roll2.total, 0 if Roll3.total<dc else Roll3.total
+
+output =  f'''-title "<name> continues with their specialized training and a side job." -desc “&*&” -f "**Downtime Activity: XP**|{Roll1}\n{Roll2}" -f "**Downtime Activity: Side Job**|{Roll3}" -f "**Earned during Downtime Activities** | {p+q} XP and {r if r<(20+strengthMod+proficiencyBonus+1) else r*2} GP"'''
+
+return output
+</drac2>
+-thumb <image> -color <color>
+
+# House rule - Downtime activity in earning XP and GP exceeding DC 12
+##Version 2 with "Experience" custom counter included
+!alias dt tembed
+{{Roll1=vroll(f"1d20+{strengthMod+proficiencyBonus}")}} {{Roll2=vroll(f"1d20+{strengthMod+proficiencyBonus}")}} {{Roll3=vroll(f"1d20+{strengthMod+proficiencyBonus}")}} {{dc=12}} {{p=Roll1.total if Roll1.total>=dc else 0}} {{q=Roll2.total if Roll2.total>=dc else 0}} {{z=p+q}} {{cc="Experience"}}{{mod_cc(cc, z) if cc_exists(cc) else ""}} {{y= int(cc_str(cc))-z}}
+{{r=Roll3.total if Roll3.total>=dc and not 20 else Roll3.total*2 if Roll3.total==20 else Roll3.total if Roll3.total>=dc else 0}}
+-title "<name> continues with their specialized training and a side job."
+-f "Downtime Activity: XP|{{Roll1}}
+{{Roll2}}" -f "Downtime Activity: Side Job|{{Roll3}}"
+-f "Earned during Downtime Activities |
+{{z}} XP and {{r}} GP"
+-f "Total {{cc}}|{{cc_str(cc) if cc_exists(cc) else ""}} (*previously {{y}}*)"
+-thumb <image> -color <color>
+
+-
+# House rule - Downtime activity in GP only exceeding DC 12
+!alias dtgp embed
+<drac2>
+Roll1, Roll2, Roll3= vroll(f"1d20+{strengthMod+proficiencyBonus+1}"), vroll(f"1d20+{strengthMod+proficiencyBonus+1}"), vroll(f"1d20+{strengthMod+proficiencyBonus+1}")
+dc = 12
+
+p, q, r = 0 if Roll1.total<dc else Roll1.total if Roll1.total<(20+strengthMod+proficiencyBonus+1) else Roll1.total*2, 0 if Roll2.total<dc else Roll2.total if Roll2.total<(20+strengthMod+proficiencyBonus+1) else Roll2.total*2, 0 if Roll3.total<dc else Roll3.total if Roll3.total<(20+strengthMod+proficiencyBonus+1) else Roll3.total*2
+
+output =  f'''-title "<name> continues doing their side jobs." -desc “&*&” -f "**Downtime Activity: Side Job**|{Roll1}\n{Roll2}\n{Roll3}" -f "**Earned during Downtime Activities** | {p+q+r} GP"'''
+
+return output
+</drac2>
+-thumb <image> -color <color>
+
+-
+# House rule - Downtime activity in XP only exceeding DC 12
+!alias dtxp embed
+<drac2>
+Roll1, Roll2, Roll3= vroll(f"1d20+{strengthMod}"), vroll(f"1d20+{strengthMod}"), vroll(f"1d20+{strengthMod}") 
+dc = 12
+
+p, q, r = 0 if Roll1.total<dc else Roll1.total, 0 if Roll2.total<dc else Roll2.total, 0 if Roll3.total<dc else Roll3.total
+
+output =  f'''-title "<name> continues with their specialized training." -desc "&*&" -f "**Downtime Activity: XP**|{Roll1}\n{Roll2}\n{Roll3}" -f "**Earned during Downtime Activities** | {p+q+r} XP"'''
+
+return output
+</drac2>
+-thumb <image> -color <color>
+
+-
