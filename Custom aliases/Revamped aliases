@@ -104,3 +104,30 @@ If the wild surge requires a saving throw, the DC equals 8 + your proficiency bo
 -f "Roll|{{dieroll}}" 
 -f "Result|{{result[0]}}"
 -color <color> -thumb <image>
+
+-----
+# Fighter class feature: Second Wind
+## Instead of using !fighter, a shortcut to Second Wind for convenient access
+### drac2 version
+!alias 2nd embed
+<drac2>
+cc = "Second Wind"
+v = cc_exists(cc) and get_cc(cc)
+mod_cc(cc,-1, True) if v else ""
+hp = vroll(f"1d10+{FighterLevel}" if v else "0")
+mod_hp(hp.total, 0)
+
+output = f''' -title "{name} activities a Second Wind!" -f "**Description** | You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.\n\nOnce you use this feature, you must finish a short or long rest before you can use it again." -f "Roll | {hp}" -f "{cc}|{cc_str(cc) if v else "Your wind has departed you!"}" -footer "{name}: {hp_str()}" -color {color} -thumb {image}'''
+
+return output
+</drac2>
+
+----
+# Echo Knight Fighter: Mainfest Echo
+## Inspirations, ideas, and references are from Avrae Server
+### NOTE: This alias is made with minor changes for better text flavor and convenient use
+
+!alias ek multiline 
+!embed -title "<name> manifests an Echo!" -desc "You can use a bonus action to magically manifest an echo of yourself in an unoccupied space you can see within 15 feet of you. This echo is a magical, translucent, gray image of you that lasts until it is destroyed, until you dismiss it as a bonus action, until you manifest another echo, or until you're incapacitated. Your echo has AC 14 + your proficiency bonus, 1 hit point, and immunity to all conditions. If it has to make a saving throw, it uses your saving throw bonus for the roll. It is the same size as you, and it occupies its space. On your turn, you can mentally command the echo to move up to 30 feet in any direction (no action required). If your echo is ever more than 30 feet from you at the end of your turn, it is destroyed." -color <color> -thumb <image>
+!i opt "<name>" -group "Echo-Knight" if c else "None"
+!i add 0 "Echo" -group "Echo-Knight" -hp 1 -ac {{14+proficiencyBonus}} if c else "None"
