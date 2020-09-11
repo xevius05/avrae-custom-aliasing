@@ -1,0 +1,106 @@
+#Fighting Spirit for Samurai Fighter class
+## New Version with drac2
+!alias fspirit embed
+<drac2>
+cc = "Fighting Spirit"
+v = cc_exists(cc) and get_cc(cc)
+mod_cc(cc,-1, True) if v else ""
+set_temphp(5) if v else set_temphp(0)
+
+output = f''' -title "{name} uses a Fighting Spirit!" -f "**Description** |Starting at 3rd level, your intensity in battle can shield you and help you strike true. As a bonus action on your turn, you can give yourself advantage on weapon attack rolls until the end of the current turn. When you do so, you also gain 5 temporary hit points. The number of temporary hit points increases when you reach certain levels in this class, increasing to 10 at 10th level and 15 at 15th level.\n\nYou can use this feature three times, and you regain all expended uses of it when you finish a long rest." -f "{cc}|{cc_str(cc) if v else "Your fighting spirit is not with you right now!"}" -footer "{name}: {hp_str()}" -color {color} -thumb {image}'''
+
+return output
+</drac2>
+
+## Old Version
+!alias fightingspirit embed
+{{cc="Fighting Spirit"}} {{v=cc_exists(cc) and get_cc(cc)}} {{mod_cc(cc, -1) if v else ""}}
+-title "<name> uses a Fighting Spirit!"
+-f "**Description** | Starting at 3rd level, your intensity in battle can shield you and help you strike true. As a bonus action on your turn, you can give yourself advantage on weapon attack rolls until the end of the current turn. When you do so, you also gain 5 temporary hit points. The number of temporary hit points increases when you reach certain levels in this class, increasing to 10 at 10th level and 15 at 15th level.
+
+You can use this feature three times, and you regain all expended uses of it when you finish a long rest."
+-f "{{cc}}|{{cc_str(cc) if cc_exists(cc) else "*None*"}}" {{set_temphp(5)}} -color <color> -thumb <image> -f "{{name}}|{{hp_str()}}"
+-----
+
+# Half-Orc Relentless from Half Orc racial feature
+## Original source is from https://avrae.readthedocs.io/en/latest/aliasing/aliasing_tut.html
+### Revamped version using drac2 to understand better
+!alias orcfeat tembed
+<drac2>
+cc="Relentless Endurance"
+v=cc_exists(cc) and get_cc(cc) and not get_hp()
+mod_cc(cc, -1) if v else ""
+set_hp(1) if v and not get_hp() else ""
+
+output= f'''-title "{name} {'uses' if v else 'tries to use'} {cc}!" -desc '{"When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead." if v else "You have more than 0 hit points." if get_hp() else "You can't use this feature again until you finish a Long Rest." if cc_exists(cc) else "You do not have this ability"}' -f "{cc} | {cc_str(cc) if cc_exists(cc) else '*None*'}" -footer "<{name}: {hp_str()}>"'''
+
+return output
+</drac2>
+-thumb <image> -color <color>
+
+-
+# Rod of the Pact Keeper+1
+## Original source is from Avrae server
+### Revamped version using drac2
+
+!alias rodopact tembed
+<drac2>
+cc="Rod of the Pact Keeper+1"
+v=cc_exists(cc)
+get_cc(cc) if v else create_cc("Rod of the Pact Keeper+1",0,1,"long","bubble")
+mod_cc(cc,-1) if v and get_cc(cc) else err("Your rod has no more remaining power!")
+Warlockness = int(get('WarlockLevel',0))
+
+if Warlockness:
+    W = int(WarlockLevel)
+    slotLevel = min(ceil(W/2),5)
+
+set_slots(slotLevel,min(get_slots(slotLevel)+1,get_slots_max(slotLevel)))
+
+output=f''' -title "{name} Uses Their Rod of the Pact Keeper+1!" -f "**Rod of the Pact Keeper+1**| As an action while holding the rod, you can regain 1 warlock spell slot. You can't use this property again until you finish a long rest." -f "{cc}|{cc_str(cc) if v else ""}" -f "**Spell Slots**|{slots_str(slotLevel)}"'''
+
+return output
+</drac2>
+-thumb <image> -color <color> -footer "Revamped by xenonanomly#7265 - Thanks to Avrae Helpers for the pointers"
+
+-----
+# Revised Martial Equipment - Combat Blade Mastery Feat
+## Original reference is from Avrae server - !ready
+### Translating the parrying stance based on !ready
+
+!alias pstance embed 
+<drac2>
+target, combatTarget = name, ""
+if combat():
+    combatTarget = combat().me
+if combatTarget:
+    combatTarget.add_effect("Assuming a parrying stance","-ac +2",1)
+output =  f'-title "{combatTarget.name if combatTarget else target} readies their blade!" -desc "On your turn, your can use your reaction to assume a parrying stance. Until your turn or until you are no longer holding a Combat Blade, you gain +2 to your AC against melee weapon or melee spell attacks that target you." -footer "Revised Martial Equipment Rules: Combat Blade Master Feat" -thumb {image if "&1"+"&"=="&1&" else ""} -color {color}'+(f' -f "{combatTarget.name}|**Effect**: {combatTarget.get_effect("Assuming a parrying stance")}"'  if combatTarget else "")
+
+return output
+</drac2>
+
+-----
+# Homebrew magical tattoo
+## Original reference is from Avrae server's !exhaust
+
+!alias mark embed {{cc="Corruption"}}{{'' if cc_exists(cc) or "&*&" in "help?" else (create_cc_nx(cc,0,6,None,"bubble"),mod_cc(cc,-6))}}{{eD=load_json(get_gvar("5aeae7d6-df11-45e7-8695-fff745950c53"))}}{{mode=1 if "&1&".strip("+-").isdigit() else 2 if "&1&"=="clear" else 0}}{{mod=int("&1&") if mode==1 else -(get_cc(cc)) if mode==2 else 0}}{{cc_exists(cc) and mode and mod_cc(cc,mod)}}{{eL=get_cc(cc) if cc_exists(cc) else 0}}{{eS=[eD[x] for x in range(eL)]}} -title "<name> {{f'gains {mod}' if mod>0 else f'clears {-1*mod}' if mod<0 else 'needs help with' if '&1&' in 'help?' else 'checks their'}} {{cc}} Level{{'s'*(mod!=1 and mod!=-1)}}!" {{'' if mode else '-f "Instructions|To create a Corruption counter, use `!mark create`.\nTo gain corruption, use `!mark #`.\nTo lose exhaustion without resting, use `!mark -#` to remove # level(s) or `!mark clear` to remove all corruption." -f "'+cc+' Effects|'+'\n'.join([eD[x] for x in range(6)])+'"' if "&1&" in "help?" else ''}} -f "<name>'s {{cc}}| {{cc_str(cc)+'\n' if cc_exists(cc) else''}}{{'\n'.join(eS) if len(eS) else 'You are not corrupted.'}}" -color <color> -thumb <image>
+
+-----
+# Wild Soul Barbarain - Rage table
+## Original reference is from Avrae server's !wtable
+### Wild Soul gvar: 077d6cec-ef8b-4054-92e6-be5e4ca26ab7
+
+!alias wrage embed
+-title "<name> uses Wild Soul Rage!"
+-f "Description | Starting at 3rd level, magic erupts from you as you rage. When you enter your rage, roll on the Wild Surge table to determine the magical effect produced. 
+
+If the wild surge requires a saving throw, the DC equals 8 + your proficiency bonus + your Constitution modifier."
+-f "DC | {{10 + constitutionMod + proficiencyBonus}}"
+{{table=load_json(get_gvar("077d6cec-ef8b-4054-92e6-be5e4ca26ab7"))}}
+{{highest=[x for x in table][-1]}}
+{{dieroll=vroll(f"1d{highest}")}}
+{{result=[table[x] for x in table if dieroll.total<=int(x)]}}
+-f "Roll|{{dieroll}}" 
+-f "Result|{{result[0]}}"
+-color <color> -thumb <image>
