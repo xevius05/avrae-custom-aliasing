@@ -74,3 +74,33 @@ return output
 </drac2>
 -thumb <image> -color <color>
 
+----------
+# House rule - Downtime activity exceeding DC 12
+## Major updates in combining both XP and GP
+!alias dt tembed
+<drac2>
+args,raw=&ARGS&,get_raw()
+argp=argparse(args)
+
+R=argp.last('rr') if argp.last('rr') else 1
+R=int(R) if str(R).isdigit() else 1
+skills=([x for x in raw.skills if args and args[0].lower().replace(" ","") in x.lower()])
+zskill=skills[0] if skills else ''
+yskill=raw.skills[zskill] if zskill else 0
+sname=zskill.title()
+
+help=((args and args[0] in "help?") or not args) or not zskill
+xps=["str","dex","con","inte","wis","cha"]
+adv=argp.adv()
+
+dice=[vroll(f"{['1d20','2d20kh1','2d20kl1'][adv]}+{yskill}") for rr in range(R)]
+ 
+total=sum([0 if z.total<12 else z.total for z in dice]) if any([k for k in args if k.lower() in xps]) else sum([0 if z.total<12 else z.total if z.total<(20+yskill) else z.total*2 for z in dice])
+die='\n'.join([str(die) for die in dice])
+output=f' -title "<name> does some downtime activities: {sname} Check!" -f "**Result**|{die}" -f "**Earned during Downtime Activity**|{total} {"XP" if any([k for k in args if k.lower() in xps]) else "GP"}"'
+
+menu=f' -f "**Help**|`!dt` with no skill check included will reveal this **HELP** message, which disappears after 60 seconds. Enter a skill to use it. Partial passing works provided it is unique, such as `!dt inte` for an INT check.\n\n `-rr #` will roll for the number of times you do your downtimes. By default, it is 1 without `-rr #`.\n\nIf you have a magical item aiding you in rolling, you may use adv - e.g. `!dt acro adv -rr 3` to earn some money from your side jobs for three downtime activities.\n\n**Note:** When you make a check using an intelligence, use `inte` instead of `int` because of its similiarity to an intimidation check being `int`. Please be careful in making the checks.\n\n\n**Special Note:** If you are on the quest or a special event with the DM-permission, only XP downtime activity is allowed." -t 60' if help else output 
+
+return menu
+</drac2>
+-footer "!dt [skill check][adv][-rr #]| !dt ?" -color <color> -thumb <image>
