@@ -1,0 +1,28 @@
+#All aliases, cvars, snippets, etc are specifically tailored to match Amellwind's Monster Hunter 5e Guide and house rules
+
+##Greatsword Category
+!servsnippet gsc adv -d "1d6+{strengthMod}" 
+<drac2>
+cc, ch = "Charged Slash", character()
+v = ch.cc_exists(cc)
+ch.mod_cc(cc,-3) if v and ch.get_cc(cc) else err("You need to recharge!")
+</drac2>
+-f "Charged Slash|As part of the Attack action you can forgo an attack with this weapon in order to grant the weapon 1 charge (3 max).
+
+When you make an attack roll while the weapon has any charges, all charges are expended and that attack is made with advantages you gain on this turn to gain 1 extra charge to expend on this attack. On hit the weapon deals an extra 1d6+your Strength modifier for each charge expended in this way."
+-f "{{cc}}|{{ch.cc_str(cc) if v else " "}}"
+
+!servalias GScharge tembed
+<drac2>
+cc, ch, charges = "Charged Slash", character(), int("&1&") if "&1&" != "&1" + "&" else 1
+v = ch.cc_exists(cc)
+ch.get_cc(cc) if v else ch.create_cc_nx(cc, 0, 3)
+ch.set_cc(cc,0) if not v else ""
+ch.mod_cc(cc,charges) if ch.get_cc(cc)<3 else ""
+</drac2>
+-f "Charged Slash|As part of the Attack action you can forgo an attack with this weapon in order to grant the weapon 1 charge (3 max).
+
+When you make an attack roll while the weapon has any charges, all charges are expended and that attack is made with advantages you gain on this turn to gain 1 extra charge to expend on this attack. On hit the weapon deals an extra 1d6+your Strength modifier for each charge expended in this way."
+-f "{{cc}}|{{ch.cc_str(cc)}}"
+-color <color> -thumb <image>
+----
