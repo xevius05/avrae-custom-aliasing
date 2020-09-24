@@ -1,0 +1,33 @@
+#To add wildfire spirit to the initiative along with its custom attack (no saving throws/checks included)
+!alias wildfire multiline
+{{cc="Wild Shape"}}{{character().mod_cc(cc,-1) if character().cc_exists(cc) and character().get_cc(cc) else ""}}
+!embed -title "<name> summons a Wildfire Spirit!" -desc "You can summon the primal spirit bound to your soul. As an action, you can expend one use of your Wild Shape feature to summon your wildfire spirit, rather than assuming a beast form.The spirit appears in an unoccupied space of your choice you can see within 30 feet of you. The only action it takes on its turn is the Dodge action, unless you take a bonus action on your turn to command it to take one of the actions in its stat block or to take the Dash, Disengage, Help, or Hide action.The wildfire spirit manifests for 1 hour, until it is reduced to 0 hit points, or until you use your Wild Shape again." -f "{{cc}}|{{character().cc_str(cc)}}" -color <color> -thumb <image>
+{{f'!i add 0 "Wildfire Spirit" -hp {2+wisdomMod+5*DruidLevel} -ac 13 -immune fire -immune charmed -immune frightened -immune grappled -immune prone -immune restrained -p {combat().me.init}'}}
+{{fatkb= 4 if DruidLevel<4 else 5 if DruidLevel<9 else 6 if DruidLevel<13 else 7 if DruidLevel<17 else 8}}{{fdmgb= 2 if DruidLevel<4 else 3 if DruidLevel<9 else 4 if DruidLevel<13 else 5 if DruidLevel<17 else 6}}
+{{f'!i effect "Wildfire Spirit" "Flame Seed" -attack "{fatkb}|1d6+{fdmgb}[fire]|range 30 ft., one target you can see."'}}
+
+----
+#Two cvars below require !use
+!cvar "fiery" {
+        "save": "dex",
+        "dc": "{spellDC}",
+        "title": "{name}'s Wildfire Spirit uses a Fiery Teleportation!",
+        "cc": "Fiery Teleportation",
+        "desc": "The spirit and each willing creature of your choice within 5 feet of it teleport up to 30 feet to unoccupied spaces you can see. Each creature within 10 feet of the space that the spirit left must succeed on a Dexterity saving throw against your spell save DC or take 1d6 + 2 fire damage.",
+        "scale": "{'1': 2, '4': 3, '9': 4, '13':5, '17':6}",
+        "d": "1d6+{scale}[fire]"
+}
+
+!cvar "summonwild"
+{
+        "save": "dex",
+        "dc": "{spellDC}",
+        "title": "{name}'s Wildfire Spirit is being summoned!",
+        "desc": "The spirit appears in an unoccupied space of your choice you can see within 30 feet of you. Each creature within 10 feet of the spirit (other than you) when it appears must succeed on a Dexterity saving throw against your spell save DC or take 2d10 fire damage.",
+        "d": "2d10[fire]"
+}
+-----
+#Alternative if !wildfire's i effect is omitted
+!a create "Flame Seed" -b 4 -d "1d6+2[fire]" -desc "range 30 ft., one target you can see."
+
+!snippet fireplus {{prof=0 if DruidLevel<4 else 1 if DruidLevel<9 else 2 if DruidLevel<13 else 3 if DruidLevel<17 else 4}} {{f' -b "{prof}" -d "{prof}"'}}
